@@ -1,0 +1,105 @@
+version: "3"
+
+networks:
+    laravel:
+
+services:
+    web:
+        image: nginx:latest
+        container_name: laravel-web
+        environment:
+            TZ: Europe/Kiev
+        ports:
+            - "${WEB_PORT}:80" #Если ругается что какой-то порт занят попробуйте сменить первую 80 на что-то другое, допустим на - "83:80"
+            - "${WEB_SSL_PORT}:443" #Если ругается что какой-то порт занят попробуйте сменить первую 443 на что-то другое, допустим на - "444:443"
+        restart: always
+        volumes:
+            - ..:/var/www/
+            - ./nginx/logs:/var/log/nginx #логи будут "синхронизироватся" в эту папку (nginx/logs)
+            - ./nginx/conf/default.conf:/etc/nginx/conf.d/default.conf #пробрасываем конфиг в нужную папку
+            - ./nginx/certs/:/etc/nginx/certs #пробрасываем сертификат в нужную папку
+        networks:
+          - laravel
+
+    app:
+        build:
+            context: php
+            dockerfile: Dockerfile
+            args:
+                - CURRENT_USER=${CURRENT_USER}
+        container_name: laravel-php
+        environment:
+            TZ: Europe/Kiev
+        volumes:
+            - ..:/var/www/
+        networks:
+          - laravel
+#        ports:
+#            - "9001:9000"
+
+    artisan:
+        container_name: laravel-artisan
+        build:
+            context: artisan
+            dockerfile: Dockerfile
+            args:
+                - CURRENT_USER=${CURRENT_USER}
+        environment:
+            TZ: Europe/Kiev
+        volumes:
+            - ..:/var/www/
+        depends_on:
+            - mysql
+        working_dir: /var/www/
+        entrypoint: [ "php", "/var/www/artisan" ]
+        networks:
+            - laravel
+
+    mysql:
+        image: mysql:latest
+        container_name: laravel-mysql
+        restart: unless-stopped
+        tty: true
+        ports:
+            - "${MYSQL_PORT}:3306" #Если ругается что какой-то порт занят попробуйте сменить первую 3309 на что-то другое, допустим на - "3308:3306"
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+            - ./mysql/configs/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./mysql/dumps/laravel.sql:/docker-entrypoint-initdb.d/laravel.sql
+        environment:
+            TZ: Europe/Kiev
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASS}
+            MYSQL_ROOT_PASSWORD: ${DB_PASS}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        networks:
+          - laravel
+
+    redis:
+        image: redis:7.0.5-alpine
+        container_name: laravel-redis
+        restart: always
+        ports:
+            - "${REDIS_PORT}:6379"
+        command: [ redis-server ]
+        environment:
+            TZ: Europe/Kiev
+        networks:
+          - laravel
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: laravel-phpmyadmin
+        depends_on:
+            - mysql
+        ports:
+            - "${PHPMYADMIN_PORT}:80"
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+            MYSQL_ROOT_PASSWORD: ${DB_PASS}
+        restart: always
+        networks:
+            - laravel

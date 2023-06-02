@@ -1,0 +1,75 @@
+To create a self-signed SSL certificate for laravel-onboarding.dev on your local development environment, you can use the following steps:
+
+Install OpenSSL if you haven't already. This can usually be done through your package manager or by downloading the OpenSSL installer from the official website.
+
+Generate a private key:
+
+openssl genrsa -out laravel-onboarding.dev.key 2048
+
+Generate a certificate signing request (CSR):
+
+openssl req -new -key laravel-onboarding.dev.key -out laravel-onboarding.dev.csr
+
+When prompted, enter the following information:
+
+Country Name (2 letter code): Enter your country code (e.g. US)
+State or Province Name (full name): Enter your state or province name (e.g. California)
+Locality Name (eg, city): Enter your city name (e.g. San Francisco)
+Organization Name (eg, company): Enter your organization name (e.g. Acme Inc)
+Organizational Unit Name (eg, section): Enter your organizational unit name (e.g. IT)
+Common Name (eg, fully qualified host name): Enter laravel-onboarding.dev
+Email Address: Enter your email address (optional)
+Create a self-signed certificate using the private key and CSR:
+
+
+openssl x509 -req -days 365 -in laravel-onboarding.dev.csr -signkey laravel-onboarding.dev.key -out laravel-onboarding.dev.crt
+
+This will create a self-signed certificate valid for 365 days.
+
+Move the private key and certificate files to your Nginx configuration directory. For example, if you are using the default Nginx configuration on Ubuntu, you would move the files to /etc/nginx/ssl/.
+
+
+sudo mkdir -p /etc/nginx/ssl/
+sudo mv laravel-onboarding.dev.key /etc/nginx/ssl/
+sudo mv laravel-onboarding.dev.crt /etc/nginx/ssl/
+
+
+Configure Nginx to use SSL for laravel-onboarding.dev. You can use the following server block in your Nginx configuration file:
+
+
+server {
+    listen 443 ssl;
+    server_name laravel-onboarding.dev;
+
+    ssl_certificate /etc/nginx/ssl/laravel-onboarding.dev.crt;
+    ssl_certificate_key /etc/nginx/ssl/laravel-onboarding.dev.key;
+
+    root /var/www/html/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+
+
+This assumes that your Laravel project is located at /var/www/html.
+
+Restart Nginx to apply the changes:
+
+Copy code
+sudo service nginx restart
+You should now be able to access your Laravel application using HTTPS at https://laravel-onboarding.dev. However, since this is a self-signed certificate, your browser will warn you that the connection is not secure. You can ignore this warning and proceed to your site.
