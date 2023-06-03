@@ -3,6 +3,7 @@
     use App\Http\Controllers\Api\AuthController;
     use App\Http\Controllers\Api\PlantController;
     use App\Http\Controllers\CompanyController;
+    use App\Http\Controllers\RoleController;
     use App\Http\Controllers\UserController;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@
         Route::get('/plants', [PlantController::class, 'index']);
         Route::post('/plants/store', [PlantController::class, 'store']);
         Route::delete('/plants/destroy/{id}', [PlantController::class, 'destroy']);
+
+        Route::get('/roles', [RoleController::class, 'index']);
 
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);
 
