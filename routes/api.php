@@ -33,6 +33,8 @@
         Route::delete('/plants/destroy/{id}', [PlantController::class, 'destroy']);
 
         Route::get('/roles', [RoleController::class, 'index']);
+        Route::post('/roles/store', [RoleController::class, 'store']);
+        Route::delete('/roles/destroy/{id}', [RoleController::class, 'destroy']);
 
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);
 
