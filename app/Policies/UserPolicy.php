@@ -19,11 +19,15 @@ class UserPolicy
     }
 
     public function canViewPlants(User $user) {
-        return $user->role->name === "Admin";
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
     }
 
     public function canStoreCompany(User $user) {
         return $user->role->name === 'Admin';
+    }
+
+    public function canStorePlant(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
     }
 
     public function canUpdateCompany(User $user) {
@@ -32,5 +36,9 @@ class UserPolicy
 
     public function canDeleteCompany(User $user) {
         return $user->role->name === 'Admin';
+    }
+
+    public function canDeletePlant(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
     }
 }

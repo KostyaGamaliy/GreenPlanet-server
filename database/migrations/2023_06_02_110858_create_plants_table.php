@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies');
-            $table->unsignedBigInteger('sensor_id');
-//            $table->foreign('sensor_id')->references('id')->on('sensors')->onDelete('cascade');
+            $table->unsignedBigInteger('sensor_id')->nullable();
             $table->string('name');
             $table->string('image')->nullable();
+            $table->string('description')->nullable();
             $table->date('watering_time')->nullable();
             $table->timestamps();
         });

@@ -1,7 +1,7 @@
 <?php
 
     use App\Http\Controllers\Api\AuthController;
-    use App\Http\Controllers\Api\PlantCompany;
+    use App\Http\Controllers\Api\PlantController;
     use App\Http\Controllers\CompanyController;
     use App\Http\Controllers\UserController;
     use Illuminate\Http\Request;
@@ -27,7 +27,9 @@
         Route::put('/companies/update/{id}', [CompanyController::class, 'update']);
         Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
 
-        Route::get('/plants', [PlantCompany::class, 'index']);
+        Route::get('/plants', [PlantController::class, 'index']);
+        Route::post('/plants/store', [PlantController::class, 'store']);
+        Route::delete('/plants/destroy/{id}', [PlantController::class, 'destroy']);
 
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);
 
