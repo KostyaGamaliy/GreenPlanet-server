@@ -11,7 +11,7 @@ class Company extends Model
 
     protected $guarded = false;
 
-    protected $fillable = ['name', 'image', 'location'];
+    protected $fillable = ['name', 'image', 'location', 'description'];
 
     public function users() {
         return $this->hasMany(User::class);

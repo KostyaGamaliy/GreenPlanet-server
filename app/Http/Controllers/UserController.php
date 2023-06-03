@@ -4,15 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
     public function destroyUser($id, Request $request) {
         $user = User::findOrFail($id);
+        $isAdmin = Auth::guard('sanctum')->user();
 
         try {
-            $this->authorize('canDestroyUser', $user);
+            $this->authorize('canDestroyUser', $isAdmin);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
         }

@@ -14,7 +14,15 @@ class AdminPolicy
         return $user->role->name === 'Admin';
     }
 
+    public function canViewCompanies(User $user) {
+        return $user->role->name === "Admin";
+    }
+
     public function canStoreCompany(User $user) {
+        return $user->role->name === 'Admin';
+    }
+
+    public function canDeleteCompany(User $user) {
         return $user->role->name === 'Admin';
     }
 }
