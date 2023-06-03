@@ -101,7 +101,7 @@ class CompanyController extends Controller
         try {
             $this->authorize('canUpdateCompany', $isPolicy);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
         }
 
         $company = Company::findOrFail($id);
