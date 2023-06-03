@@ -21,7 +21,10 @@
     Route::post('/auth/register', [AuthController::class, 'register']);
 
     Route::group(['middleware' => 'auth:sanctum'], function () {
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);
 
         Route::resource('company', CompanyController::class);
     });
+

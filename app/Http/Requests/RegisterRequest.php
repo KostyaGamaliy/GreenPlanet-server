@@ -23,7 +23,7 @@ class RegisterRequest extends FormRequest
     {
         return [
             'full_name' => 'required|string|min:3|max:25',
-            'email' => 'required|string|email:rfc,dns|unique:users,email,'.$this->id,
+            'email' => 'required|string|email:rfc,dns|unique:users,email',
             'password' => 'required|min:8',
             'role_id' => 'required|exists:roles,id',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
