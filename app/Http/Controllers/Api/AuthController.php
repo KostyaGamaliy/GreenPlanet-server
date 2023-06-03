@@ -3,19 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
         $credentials = request(['email', 'password']);
         if (!auth()->attempt($credentials)) {
             return response()->json([
@@ -30,23 +27,27 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
         $authToken = $user->createToken('auth-token')->plainTextToken;
+        $user->update(['login_token' => $authToken]);
 
         return response()->json([
            'access_token' => $authToken
         ]);
     }
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-           'name' => 'required|min:3|max:25',
-            'email' => 'required|email',
-            'password' => 'required|min:6|max:100'
-        ]);
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $data['image'] = $image->store('images', 'public');
+        } else {
+            $data['image'] = 'images/default-image-for-user.png';
+        }
 
         $user = User::create([
-            'name' => $request->name,
             'email' => $request->email,
+            'full_name' => $request->full_name,
+            'role_id' => $request->role_id,
+            'image' => $data['image'],
             'password' => bcrypt($request->password)
         ]);
 
@@ -59,6 +60,8 @@ class AuthController extends Controller
 
         if ($user) {
             $user->tokens()->where('id', $request->user()->currentAccessToken()->id)->delete();
+            $user->login_token = null;
+            $user->save();
         }
 
         return response()->json([

@@ -18,9 +18,12 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
         'password',
+        'role_id',
+        'login_token',
+        'image'
     ];
 
     protected $guarded = false;
@@ -44,4 +47,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function role() {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function company() {
+        return $this->belongsTo(Company::class);
+    }
 }
