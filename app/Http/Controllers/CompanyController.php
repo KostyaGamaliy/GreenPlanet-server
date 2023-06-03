@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCompanyRequest;
+use App\Http\Requests\UpdateCompanyRequest;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -93,9 +94,21 @@ class CompanyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateCompanyRequest $request, string $id)
     {
+        $isPolicy = Auth::guard('sanctum')->user();
 
+        try {
+            $this->authorize('canUpdateCompany', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+        }
+
+        $company = Company::findOrFail($id);
+
+        $company->update($request);
+
+        return response()->json($company);
     }
 
     /**
