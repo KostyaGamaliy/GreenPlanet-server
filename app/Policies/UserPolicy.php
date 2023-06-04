@@ -34,6 +34,10 @@ class UserPolicy
         return $user->role->name === 'Admin';
     }
 
+    public function canStoreIotDates(User $user) {
+        return $user->role->name === 'Admin';
+    }
+
     public function canUpdateCompany(User $user) {
         return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
     }

@@ -18,6 +18,6 @@ class Sensor extends Model
     }
 
     public function sensorsDates() {
-        return $this->hasMany(SensorsDate::class);
+        return $this->hasMany(SensorDates::class);
     }
 }

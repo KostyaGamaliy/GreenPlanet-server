@@ -4,6 +4,7 @@
     use App\Http\Controllers\Api\PlantController;
     use App\Http\Controllers\CompanyController;
     use App\Http\Controllers\RoleController;
+    use App\Http\Controllers\SensorController;
     use App\Http\Controllers\UserController;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Route;
@@ -22,6 +23,8 @@
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/register', [AuthController::class, 'register']);
 
+    Route::post('/sensors/store-data', [SensorController::class, 'storeDates']);
+
     Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/companies', [CompanyController::class, 'index']);
         Route::post('/companies/store', [CompanyController::class, 'store']);
@@ -36,6 +39,8 @@
         Route::post('/roles/store', [RoleController::class, 'store']);
         Route::put('/roles/update/{id}', [RoleController::class, 'update']);
         Route::delete('/roles/destroy/{id}', [RoleController::class, 'destroy']);
+
+
 
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);
 
