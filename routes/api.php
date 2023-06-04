@@ -34,6 +34,7 @@
 
         Route::get('/roles', [RoleController::class, 'index']);
         Route::post('/roles/store', [RoleController::class, 'store']);
+        Route::put('/roles/update/{id}', [RoleController::class, 'update']);
         Route::delete('/roles/destroy/{id}', [RoleController::class, 'destroy']);
 
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);

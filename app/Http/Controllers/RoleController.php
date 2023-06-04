@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoleRequest;
+use App\Http\Requests\UpdateRoleRequest;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +40,7 @@ class RoleController extends Controller
         return response()->json($role);
     }
 
-    public function update() {
+    public function update($id, UpdateRoleRequest $request) {
         $isPolicy = Auth::guard('sanctum')->user();
 
         try {
@@ -47,6 +48,11 @@ class RoleController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
         }
+
+        $role = Role::findOrFail($id);
+        $role->update(['name' => $request->name]);
+
+        return response()->json($role);
     }
 
     public function destroy($id) {
