@@ -23,7 +23,8 @@ class User extends Authenticatable
         'password',
         'role_id',
         'login_token',
-        'image'
+        'image',
+        'company_id'
     ];
 
     protected $guarded = false;

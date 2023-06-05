@@ -9,6 +9,21 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    public function addToCompany($id, Request $request) {
+        $user = User::findOrFail($id);
+        $isAdmin = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canStoreUserToCompany', $isAdmin);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+        }
+
+        $user->update(['company_id' => $request->company_id]);
+
+        return response()->json($user);
+    }
+
     public function destroyUser($id, Request $request) {
         $user = User::findOrFail($id);
         $isAdmin = Auth::guard('sanctum')->user();
