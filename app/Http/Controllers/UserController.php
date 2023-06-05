@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function addToCompany($id, Request $request) {
-        $user = User::findOrFail($id);
+    public function addToCompany($userId, $companyId) {
+        $user = User::findOrFail($userId);
         $isAdmin = Auth::guard('sanctum')->user();
 
         try {
@@ -19,7 +19,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
         }
 
-        $user->update(['company_id' => $request->company_id]);
+        $user->update(['company_id' => $companyId]);
 
         return response()->json($user);
     }
@@ -43,5 +43,21 @@ class UserController extends Controller
         return response()->json([
            'message' => $request->message,
         ]);
+    }
+
+    public function removeFromCompany($userId) {
+        $user = User::findOrFail($userId);
+        $isAdmin = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canRemoveFromCompany', $isAdmin);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+        }
+
+        $user->company_id = null;
+        $user->save();
+
+        return response()->json($user);
     }
 }

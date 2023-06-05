@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
+use App\Jobs\CreateCompanyJob;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -47,7 +48,7 @@ class CompanyController extends Controller
      */
     public function store(StoreCompanyRequest $request)
     {
-        $user = User::where('id', $request->user_id);
+        $user = User::find($request->user_id);
         $isAdmin = Auth::guard('sanctum')->user();
 
         try {
@@ -56,23 +57,41 @@ class CompanyController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
         }
 
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $data['image'] = $image->store('images', 'public');
+        if ($request->isStore) {
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $data['image'] = $image->store('images', 'public');
+            } else {
+                $data['image'] = 'images/default-image-for-company.png';
+            }
+
+            $company = Company::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'image' => $data['image'],
+                'location' => $request->location,
+            ]);
+
+            $user->update(['company_id' => $company->id]);
+
+            $emailData = [
+                'recipient' => $user,
+                'isStore' => $request->isStore,
+                'company' => $company
+            ];
+
         } else {
-            $data['image'] = 'images/default-image-for-company.png';
+            $emailData = [
+                'recipient' => $user,
+                'isStore' => $request->isStore,
+                'company' => ['name' => $request->name]
+            ];
         }
 
-        $company = Company::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'image' => $data['image'],
-            'location' => $request->location,
-        ]);
+        CreateCompanyJob::dispatch($emailData);
 
-        $user->update(['company_id' => $company->id]);
+        return response()->json($company ?? 'Не одобрено');
 
-        return response()->json($company);
     }
 
     /**

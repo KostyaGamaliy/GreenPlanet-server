@@ -41,8 +41,9 @@
         Route::post('/roles/update', [RoleController::class, 'update']);
         Route::delete('/roles/destroy/{id}', [RoleController::class, 'destroy']);
 
-        Route::post('/user/{id}/company/add', [UserController::class, 'addToCompany']);
+        Route::post('/user/{userId}/company/{companyId}/add', [UserController::class, 'addToCompany']);
         Route::delete('/user/destroy/{id}', [UserController::class, 'destroyUser']);
+        Route::put('/user/{userId}/company/remove', [UserController::class, 'removeFromCompany']);
 
         Route::post('/auth/logout', [AuthController::class, 'logout']);
     });

@@ -69,4 +69,8 @@ class UserPolicy
     public function canDestroyRole(User $user) {
         return $user->role->name === 'Admin';
     }
+
+    public function canRemoveFromCompany(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
+    }
 }
