@@ -40,7 +40,7 @@ class RoleController extends Controller
         return response()->json($role);
     }
 
-    public function update($id, UpdateRoleRequest $request) {
+    public function update(UpdateRoleRequest $request) {
         $isPolicy = Auth::guard('sanctum')->user();
 
         try {
@@ -49,7 +49,7 @@ class RoleController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
         }
 
-        $role = Role::findOrFail($id);
+        $role = Role::findOrFail($request->role_id);
         $role->update(['name' => $request->name]);
 
         return response()->json($role);

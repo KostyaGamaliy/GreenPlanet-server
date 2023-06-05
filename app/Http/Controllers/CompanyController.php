@@ -80,7 +80,17 @@ class CompanyController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canViewCompany', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+        }
+
+        $companies = Company::findOrFail($id);
+
+        return response()->json($companies);
     }
 
     /**
@@ -94,7 +104,7 @@ class CompanyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCompanyRequest $request, string $id)
+    public function update(UpdateCompanyRequest $request)
     {
         $isPolicy = Auth::guard('sanctum')->user();
 
@@ -104,9 +114,25 @@ class CompanyController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
         }
 
-        $company = Company::findOrFail($id);
+        $company = Company::findOrFail($request->company_id);
 
-        $company->update($request);
+        if ($company->image !== "images/default-image-for-company.png") {
+            Storage::disk('public')->delete($company->image);
+        }
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $data['image'] = $image->store('images', 'public');
+        } else {
+            $data['image'] = 'images/default-image-for-company.png';
+        }
+
+        $company->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'image' => $data['image'],
+            'location' => $request->location,
+        ]);
 
         return response()->json($company);
     }
