@@ -28,6 +28,7 @@
             $user = User::where('email', $request->email)->first();
             $authToken = $user->createToken('auth-token')->plainTextToken;
             $user->update(['login_token' => $authToken]);
+            $user->role = $user->role;
 
             return response()->json([
                 'user' => $user,
