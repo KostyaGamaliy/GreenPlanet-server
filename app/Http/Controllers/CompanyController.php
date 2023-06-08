@@ -13,10 +13,6 @@ use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
-//    public function __construct()
-//    {
-//        $this->authorizeResource(Company::class, 'company');
-//    }
     /**
      * Display a listing of the resource.
      */
@@ -33,14 +29,6 @@ class CompanyController extends Controller
         $companies = Company::all();
 
         return response()->json($companies);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-
     }
 
     /**
@@ -110,14 +98,6 @@ class CompanyController extends Controller
         $companies = Company::findOrFail($id);
 
         return response()->json($companies);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**

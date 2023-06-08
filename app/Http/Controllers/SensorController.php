@@ -15,6 +15,9 @@ class SensorController extends Controller
             'soil_moisture_data' => $request->soil_moisture_data,
         ]);
 
-        return response()->json($iotData);
+        return response()->json([
+            'sensor_status_id' => $iotData->sensor->id,
+            'name' => $iotData->sensor->name,
+        ]);
     }
 }
