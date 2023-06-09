@@ -23,6 +23,31 @@ class UserController extends Controller
         return response()->json($users);
     }
 
+    public function show($id) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canViewPlants', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+        }
+
+        $user = User::findOrFail($id);
+        $user->role = $user->role;
+
+        return response()->json($user);
+    }
+
+    public function update($id) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canViewPlants', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+        }
+    }
+
     public function addToCompany($userId, $companyId) {
         $user = User::findOrFail($userId);
         $isAdmin = Auth::guard('sanctum')->user();
@@ -38,7 +63,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function destroyUser($id, Request $request) {
+    public function destroy($id, Request $request) {
         $user = User::findOrFail($id);
         $isAdmin = Auth::guard('sanctum')->user();
 

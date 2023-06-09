@@ -41,8 +41,10 @@
         Route::delete('/roles/destroy/{id}', [RoleController::class, 'destroy']);
 
         Route::get('/users', [UserController::class, 'index']);
+        Route::get('/users/{id}/show', [UserController::class, 'show']);
+        Route::put('/users/{id}/update', [UserController::class, 'update']);
         Route::post('/users/{userId}/company/{companyId}/add', [UserController::class, 'addToCompany']);
-        Route::delete('/users/destroy/{id}', [UserController::class, 'destroyUser']);
+        Route::delete('/users/destroy/{id}', [UserController::class, 'destroy']);
         Route::put('/users/{userId}/company/remove', [UserController::class, 'removeFromCompany']);
 
         Route::post('/auth/logout', [AuthController::class, 'logout']);
