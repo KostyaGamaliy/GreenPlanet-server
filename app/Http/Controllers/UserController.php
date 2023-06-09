@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    public function index() {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canViewPlants', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+        }
+
+        $users = User::all();
+
+        return response()->json($users);
+    }
+
     public function addToCompany($userId, $companyId) {
         $user = User::findOrFail($userId);
         $isAdmin = Auth::guard('sanctum')->user();
