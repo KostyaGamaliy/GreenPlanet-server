@@ -113,7 +113,7 @@ class CompanyController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
         }
 
-        $company = Company::findOrFail($request->company_id);
+        $company = Company::findOrFail($request->id);
 
         if ($company->image !== "images/default-image-for-company.png") {
             Storage::disk('public')->delete($company->image);
