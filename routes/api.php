@@ -37,11 +37,12 @@
 
         Route::get('/roles', [RoleController::class, 'index']);
         Route::post('/roles/store', [RoleController::class, 'store']);
-        Route::post('/roles/update', [RoleController::class, 'update']);
+        Route::get('/roles/{id}/show', [RoleController::class, 'getRole']);
+        Route::put('/roles/{id}/update', [RoleController::class, 'update']);
         Route::delete('/roles/destroy/{id}', [RoleController::class, 'destroy']);
 
         Route::get('/users', [UserController::class, 'index']);
-        Route::get('/users/{id}/show', [UserController::class, 'show']);
+        Route::get('/users/{id}/show', [UserController::class, 'getUser']);
         Route::put('/users/{id}/update', [UserController::class, 'update']);
         Route::post('/users/{userId}/company/{companyId}/add', [UserController::class, 'addToCompany']);
         Route::delete('/users/destroy/{id}', [UserController::class, 'destroy']);

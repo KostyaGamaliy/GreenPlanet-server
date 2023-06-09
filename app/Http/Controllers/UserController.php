@@ -27,7 +27,7 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function show($id) {
+    public function getUser($id) {
         $isPolicy = Auth::guard('sanctum')->user();
 
         try {
