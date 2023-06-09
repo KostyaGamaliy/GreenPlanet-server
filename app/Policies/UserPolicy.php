@@ -27,6 +27,10 @@ class UserPolicy
         return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
     }
 
+    public function canViewApplications(User $user) {
+        return $user->role->name === 'Admin';
+    }
+
     public function canStoreCompany(User $user) {
         return $user->role->name === 'Admin';
     }

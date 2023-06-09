@@ -2,6 +2,7 @@
 
     use App\Http\Controllers\Api\AuthController;
     use App\Http\Controllers\Api\PlantController;
+    use App\Http\Controllers\ApplicationController;
     use App\Http\Controllers\CompanyController;
     use App\Http\Controllers\RoleController;
     use App\Http\Controllers\SensorController;
@@ -47,6 +48,8 @@
         Route::post('/users/{userId}/company/{companyId}/add', [UserController::class, 'addToCompany']);
         Route::delete('/users/destroy/{id}', [UserController::class, 'destroy']);
         Route::put('/users/{userId}/company/remove', [UserController::class, 'removeFromCompany']);
+
+        Route::get('/applications', [ApplicationController::class, 'index']);
 
         Route::post('/auth/logout', [AuthController::class, 'logout']);
     });
