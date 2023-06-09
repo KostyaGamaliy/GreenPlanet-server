@@ -19,9 +19,9 @@ class RoleController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
         }
 
-        $role = Role::all();
+        $roles = Role::all();
 
-        return response()->json($role);
+        return response()->json($roles);
     }
 
     public function store(StoreRoleRequest $request) {
