@@ -20,6 +20,10 @@ class UserController extends Controller
 
         $users = User::all();
 
+        foreach ($users as $user) {
+            $user->role = $user->role;
+        }
+
         return response()->json($users);
     }
 
@@ -79,7 +83,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function destroy($id, Request $request) {
+    public function destroy($id) {
         $user = User::findOrFail($id);
         $isAdmin = Auth::guard('sanctum')->user();
 
@@ -94,10 +98,6 @@ class UserController extends Controller
         }
 
         $user->delete();
-
-        return response()->json([
-           'message' => $request->message,
-        ]);
     }
 
     public function removeFromCompany($userId) {
