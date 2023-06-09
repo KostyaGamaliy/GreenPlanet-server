@@ -38,7 +38,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function update($id) {
+    public function update($id, Request $request) {
         $isPolicy = Auth::guard('sanctum')->user();
 
         try {
@@ -46,6 +46,22 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
         }
+
+        $user = User::findOrFail($id);
+        $requestData = json_decode($request->getContent(), true);
+
+        if ($request->hasFile('user.image')) {
+            $image = $request->file('user.image');
+            $user->image = $image->store('images', 'public');
+        } else {
+            $user->image = 'images/default-image-for-user.png';
+        }
+
+        $user->full_name = $requestData['user']['full_name'];
+        $user->email = $requestData['user']['email'];
+        $user->role_id = $requestData['user']['role']['id'];
+
+        $user->update();
     }
 
     public function addToCompany($userId, $companyId) {
