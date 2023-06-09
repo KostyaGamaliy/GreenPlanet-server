@@ -139,10 +139,8 @@ class CompanyController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id, Request $request)
+    public function destroy(string $id)
     {
-        $data = $request->user_id;
-        $user = User::find($request->user_id);
         $isAdmin = Auth::guard('sanctum')->user();
 
         try {
@@ -152,8 +150,9 @@ class CompanyController extends Controller
         }
 
         $company = Company::findOrFail($id);
-        $user->company_id = null;
-        $user->save();
+
+        // Установите company_id всех пользователей, связанных с данной компанией, в null
+        $company->users()->update(['company_id' => null]);
 
         if ($company->image !== "images/default-image-for-company.png") {
             Storage::disk('public')->delete($company->image);
@@ -169,4 +168,5 @@ class CompanyController extends Controller
             'message' => 'Видалення компанії пройшло успішно'
         ]);
     }
+
 }
