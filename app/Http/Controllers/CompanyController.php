@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCompanyRequest;
 use App\Http\Requests\UpdateCompanyRequest;
 use App\Jobs\CreateCompanyJob;
+use App\Models\Application;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,6 +70,10 @@ class CompanyController extends Controller
             ];
 
         } else {
+            $application = Application::findOrFail($request->application_id);
+
+            $application->delete();
+
             $emailData = [
                 'recipient' => $user,
                 'isStore' => $request->isStore,
