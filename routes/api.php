@@ -50,6 +50,7 @@
         Route::put('/users/{userId}/company/remove', [UserController::class, 'removeFromCompany']);
 
         Route::get('/applications', [ApplicationController::class, 'index']);
+        Route::get('/applications/{id}/show', [ApplicationController::class, 'show']);
 
         Route::post('/auth/logout', [AuthController::class, 'logout']);
     });

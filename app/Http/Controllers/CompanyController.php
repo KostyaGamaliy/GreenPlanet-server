@@ -69,6 +69,9 @@ class CompanyController extends Controller
                 'company' => $company
             ];
 
+            $application = Application::findOrFail($request->application_id);
+
+            $application->delete();
         } else {
             $application = Application::findOrFail($request->application_id);
 

@@ -27,6 +27,20 @@ class ApplicationController extends Controller
         return response()->json($applications);
     }
 
+    public function show($id) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canViewApplications', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+        }
+
+        $application = Application::findOrFail($id);
+
+        return response()->json($application);
+    }
+
     public function create() {
 
     }
