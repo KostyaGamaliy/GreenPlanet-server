@@ -20,10 +20,8 @@ class ApplicationController extends Controller
 
         $applications = Application::all();
 
-
         foreach ($applications as $application) {
-            $sender = User::findOrFail($application->sender_id);
-            $application['sender']['full_name'] = $sender->full_name;
+            $application->sender = User::findOrFail($application->sender_id);
         }
 
         return response()->json($applications);
