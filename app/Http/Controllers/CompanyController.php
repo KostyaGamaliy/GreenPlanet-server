@@ -32,6 +32,25 @@ class CompanyController extends Controller
         return response()->json($companies);
     }
 
+    public function getUsers($id) {
+        $isAdmin = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canStoreCompany', $isAdmin);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+        }
+
+        $company = Company::findOrFail($id);
+        $users = $company->users;
+
+        foreach ($users as $user) {
+            $user->role = $user->role;
+        }
+
+        return response()->json($users);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

@@ -31,8 +31,12 @@ class UserPolicy
         return $user->role->name === 'Admin';
     }
 
-    public function canStoreCompany(User $user) {
+    public function canGetUsersInCompany(User $user) {
         return $user->role->name === 'Admin';
+    }
+
+    public function canStoreCompany(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
     }
 
     public function canStorePlant(User $user) {
