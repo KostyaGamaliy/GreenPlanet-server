@@ -35,6 +35,10 @@ class UserPolicy
         return $user->role->name === 'Admin';
     }
 
+    public function canGetUsersExceptCompany(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
+    }
+
     public function canStoreCompany(User $user) {
         return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
     }

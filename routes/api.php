@@ -46,6 +46,7 @@
         Route::get('/users', [UserController::class, 'index']);
         Route::get('/users/{id}/show', [UserController::class, 'getUser']);
         Route::put('/users/{id}/update', [UserController::class, 'update']);
+        Route::get('/users/get-users', [UserController::class, 'getUsersExceptCompany']);
         Route::post('/users/{userId}/company/{companyId}/add', [UserController::class, 'addToCompany']);
         Route::delete('/users/destroy/{id}', [UserController::class, 'destroy']);
         Route::put('/users/{userId}/company/remove', [UserController::class, 'removeFromCompany']);

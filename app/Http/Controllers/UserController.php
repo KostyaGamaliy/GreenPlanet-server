@@ -42,6 +42,25 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function getUsersExceptCompany() {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canGetUsersExceptCompany', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+        }
+
+        $users = User::all();
+        foreach ($users as $user) {
+            if ($user->company_id === null) {
+                $res[] = $user;
+            }
+        }
+
+        return response()->json($res);
+    }
+
     public function update($id, Request $request) {
         $isPolicy = Auth::guard('sanctum')->user();
 
