@@ -41,11 +41,29 @@ class ApplicationController extends Controller
         return response()->json($application);
     }
 
-    public function create() {
+    public function store(Request $request) {
+        $localUser = Auth::guard('sanctum')->user();
 
-    }
+        $data['sender_id'] = $localUser->id;
+        $data['company_name'] = $request->company_name;
+        $data['company_description'] = $request->company_description;
+        $data['location'] = $request->location;
 
-    public function store() {
+        $logo = $request->file('logo');
+        $document = $request->file('document');
 
+        if ($logo) {
+            $data['company_image'] = $logo->store('images', 'public');
+        } else if (!$logo) {
+            $data['company_image'] = 'images/default-image-for-company.png';
+        }
+
+        if ($document) {
+            $data['documents'] = $document->store('images', 'public');
+        } else if (!$document) {
+            $data['documents'] = 'images/default-image-for-documents.png';
+        }
+
+        $application = Application::create($data);
     }
 }
