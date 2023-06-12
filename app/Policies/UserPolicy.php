@@ -56,7 +56,7 @@ class UserPolicy
     }
 
     public function canStoreUserToCompany(User $user) {
-        return $user->role->name === 'Admin';
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
     }
 
     public function canUpdateCompany(User $user) {

@@ -53,7 +53,7 @@ class UserController extends Controller
 
         $users = User::all();
         foreach ($users as $user) {
-            if ($user->company_id === null) {
+            if ($user->company_id === null && $user->role->id !== 1) {
                 $res[] = $user;
             }
         }
@@ -89,15 +89,17 @@ class UserController extends Controller
 
     public function addToCompany($userId, $companyId) {
         $user = User::findOrFail($userId);
-        $isAdmin = Auth::guard('sanctum')->user();
+
+        $isPolicy = Auth::guard('sanctum')->user();
 
         try {
-            $this->authorize('canStoreUserToCompany', $isAdmin);
+            $this->authorize('canStoreUserToCompany', $isPolicy);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
         }
 
         $user->update(['company_id' => $companyId]);
+        $user->update(['role_id' => 4]);
 
         return response()->json($user);
     }
