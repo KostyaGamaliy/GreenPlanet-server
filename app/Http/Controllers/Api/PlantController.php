@@ -80,7 +80,11 @@ class PlantController extends Controller
         }
 
         $plant = Plant::findOrFail($id);
-        $plant->sensor()->delete();
+        $sensor = $plant->sensor;
+        foreach ($sensor->sensorDates as $sensorDate) {
+            $sensorDate->delete();
+        }
+        $sensor->delete();
         $plant->delete();
 
         return response()->json([

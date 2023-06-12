@@ -17,7 +17,7 @@ class Sensor extends Model
         return $this->belongsTo(Plant::class);
     }
 
-    public function sensorsDates() {
+    public function sensorDates() {
         return $this->hasMany(SensorDates::class);
     }
 }
