@@ -81,6 +81,7 @@ class CompanyController extends Controller
             ]);
 
             $user->update(['company_id' => $company->id]);
+            $user->update(['role_id' => 2]);
 
             $emailData = [
                 'recipient' => $user,
@@ -125,6 +126,21 @@ class CompanyController extends Controller
         $companies = Company::findOrFail($id);
 
         return response()->json($companies);
+    }
+
+    public function showPlants($id) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canViewCompanyPlants', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+        }
+
+        $company = Company::findOrFail($id);
+        $plants = $company->plants;
+
+        return response()->json($plants);
     }
 
     /**

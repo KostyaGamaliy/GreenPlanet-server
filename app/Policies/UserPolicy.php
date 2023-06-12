@@ -19,6 +19,10 @@ class UserPolicy
         return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
     }
 
+    public function canViewCompanyPlants(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
+    }
+
     public function canViewRoles(User $user) {
         return $user->role->name === 'Admin';
     }
