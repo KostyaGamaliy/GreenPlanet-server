@@ -28,6 +28,52 @@ class PlantController extends Controller
         return response()->json($plants);
     }
 
+    public function edit($id, Request $request) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canEditPlant', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+        }
+
+        $plant = Plant::findOrFail($id);
+        $plant->sensor = $plant->sensor;
+
+        return response()->json($plant);
+    }
+
+    public function update($id, Request $request) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canUpdatePlant', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+        }
+
+        $image = $request->file('image');
+
+        if ($image) {
+            $data['image'] = $image->store('images', 'public');
+        } else {
+            $data['image'] = 'images/default-image-for-plant.png';
+        }
+
+        $plant = Plant::findOrFail($id);
+        $sensor = $plant->sensor;
+
+        $sensor->update([
+            'name' => $request->input('sensor_name'),
+        ]);
+
+        $plant->update([
+            'name' => $request->input('name'),
+            'image' => $data['image'],
+            'description' => $request->input('description'),
+        ]);
+    }
+
     public function store(Request $request) {
         $isPolicy = Auth::guard('sanctum')->user();
 
@@ -49,6 +95,7 @@ class PlantController extends Controller
             $plant = Plant::create([
                 'name' => $request->input('name'),
                 'image' => $data['image'],
+                'description' => $request->input('description'),
                 'watering_time' => $request->input('watering_time'),
                 'company_id' => $request->input('company_id'),
             ]);

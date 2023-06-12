@@ -11,7 +11,7 @@ class Plant extends Model
 
     protected $guarded = false;
 
-    protected $fillable = ['name', 'image', 'watering_time', 'company_id', 'sensor_id'];
+    protected $fillable = ['name', 'image', 'watering_time', 'company_id', 'sensor_id', 'description'];
 
     public function company() {
         return $this->belongsTo(Company::class);
