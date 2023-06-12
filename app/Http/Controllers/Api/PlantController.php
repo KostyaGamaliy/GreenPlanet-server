@@ -43,8 +43,9 @@ class PlantController extends Controller
         return response()->json($plant);
     }
 
-    public function update($id, Request $request) {
+    public function update(Request $request) {
         $isPolicy = Auth::guard('sanctum')->user();
+        $data = $request->all();
 
         try {
             $this->authorize('canUpdatePlant', $isPolicy);
@@ -60,7 +61,7 @@ class PlantController extends Controller
             $data['image'] = 'images/default-image-for-plant.png';
         }
 
-        $plant = Plant::findOrFail($id);
+        $plant = Plant::findOrFail($request->input('id'));
         $sensor = $plant->sensor;
 
         $sensor->update([
