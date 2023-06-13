@@ -9,7 +9,7 @@
 <p style="color: #666666; font-size: 16px; font-family: Arial, sans-serif;">Адміністрація розглянула вашу заявку на створення компанії <strong>{{$emailData['company']['name']}}</strong>.</p>
 
 @if($emailData['isStore'])
-    <p style="color: #666666; font-size: 16px; font-family: Arial, sans-serif;">Ваша заявку було прийнято за датою {{ \Carbon\Carbon::now()->format('Y-m-d H:i:s') }}.</p>
+    <p style="color: #666666; font-size: 16px; font-family: Arial, sans-serif;">Ваша заявку було прийнято за датою {{ \Carbon\Carbon::now()->addHours(3)->format('Y-m-d H:i:s') }}.</p>
     <p style="color: #666666; font-size: 16px; font-family: Arial, sans-serif;">Сподіваємося, у вас все вийде. Ваша адміністрація!</p>
 @else
     <p style="color: #666666; font-size: 16px; font-family: Arial, sans-serif;">Ваша заявку було відхилено. Спробуйте ще раз!</p>

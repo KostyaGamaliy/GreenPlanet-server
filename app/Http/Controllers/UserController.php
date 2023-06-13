@@ -52,6 +52,9 @@ class UserController extends Controller
         }
 
         $users = User::all();
+
+        $res = [];
+
         foreach ($users as $user) {
             if ($user->company_id === null && $user->role->id !== 1) {
                 $res[] = $user;

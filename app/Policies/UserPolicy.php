@@ -80,11 +80,11 @@ class UserPolicy
     }
 
     public function canUpdatePlant(User $user) {
-        return $user->role->name === 'Admin'  || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
     }
 
     public function canDeleteCompany(User $user) {
-        return $user->role->name === 'Admin';
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger';
     }
 
     public function canDeletePlant(User $user) {

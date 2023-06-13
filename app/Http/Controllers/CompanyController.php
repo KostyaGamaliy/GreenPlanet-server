@@ -1,71 +1,169 @@
 <?php
 
-namespace App\Http\Controllers;
+    namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreCompanyRequest;
-use App\Http\Requests\UpdateCompanyRequest;
-use App\Jobs\CreateCompanyJob;
-use App\Models\Application;
-use App\Models\Company;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+    use App\Http\Requests\StoreCompanyRequest;
+    use App\Http\Requests\UpdateCompanyRequest;
+    use App\Jobs\CreateCompanyJob;
+    use App\Models\Application;
+    use App\Models\Company;
+    use App\Models\User;
+    use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Auth;
+    use Illuminate\Support\Facades\Storage;
 
-class CompanyController extends Controller
-{
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    class CompanyController extends Controller
     {
-        $isAdmin = Auth::guard('sanctum')->user();
+        /**
+         * Display a listing of the resource.
+         */
+        public function index()
+        {
+            $isAdmin = Auth::guard('sanctum')->user();
 
-        try {
-            $this->authorize('canViewCompanies', $isAdmin);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+            try {
+                $this->authorize('canViewCompanies', $isAdmin);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+            }
+
+            $companies = Company::all();
+
+            return response()->json($companies);
         }
 
-        $companies = Company::all();
+        public function getUsers($id)
+        {
+            $isAdmin = Auth::guard('sanctum')->user();
 
-        return response()->json($companies);
-    }
+            try {
+                $this->authorize('canStoreCompany', $isAdmin);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+            }
 
-    public function getUsers($id) {
-        $isAdmin = Auth::guard('sanctum')->user();
+            $company = Company::findOrFail($id);
+            $users = $company->users;
 
-        try {
-            $this->authorize('canStoreCompany', $isAdmin);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+            foreach ($users as $user) {
+                $user->role = $user->role;
+            }
+
+            return response()->json($users);
         }
 
-        $company = Company::findOrFail($id);
-        $users = $company->users;
+        /**
+         * Store a newly created resource in storage.
+         */
+        public function store(StoreCompanyRequest $request)
+        {
+            $user = User::find($request->user_id);
+            $isAdmin = Auth::guard('sanctum')->user();
 
-        foreach ($users as $user) {
-            $user->role = $user->role;
+            try {
+                $this->authorize('canStoreCompany', $isAdmin);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+            }
+
+            if ($request->isStore) {
+                if ($request->hasFile('image')) {
+                    $image = $request->file('image');
+                    $data['image'] = $image->store('images', 'public');
+                } else {
+                    $data['image'] = 'images/default-image-for-company.png';
+                }
+
+                $company = Company::create([
+                    'name' => $request->name,
+                    'description' => $request->description,
+                    'image' => $data['image'],
+                    'location' => $request->location,
+                ]);
+
+                $user->update(['company_id' => $company->id]);
+                $user->update(['role_id' => 2]);
+
+                $emailData = [
+                    'recipient' => $user,
+                    'isStore' => $request->isStore,
+                    'company' => $company
+                ];
+
+                $application = Application::findOrFail($request->application_id);
+
+                $application->delete();
+            } else {
+                $application = Application::findOrFail($request->application_id);
+
+                $application->delete();
+
+                $emailData = [
+                    'recipient' => $user,
+                    'isStore' => $request->isStore,
+                    'company' => ['name' => $request->name]
+                ];
+            }
+
+            CreateCompanyJob::dispatch($emailData);
+
+            return response()->json($company ?? 'Не одобрено');
+
         }
 
-        return response()->json($users);
-    }
+        /**
+         * Display the specified resource.
+         */
+        public function show(string $id)
+        {
+            $isPolicy = Auth::guard('sanctum')->user();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreCompanyRequest $request)
-    {
-        $user = User::find($request->user_id);
-        $isAdmin = Auth::guard('sanctum')->user();
+            try {
+                $this->authorize('canViewCompany', $isPolicy);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+            }
 
-        try {
-            $this->authorize('canStoreCompany', $isAdmin);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
+            $companies = Company::findOrFail($id);
+
+            return response()->json($companies);
         }
 
-        if ($request->isStore) {
+        public function showPlants($id)
+        {
+            $isPolicy = Auth::guard('sanctum')->user();
+
+            try {
+                $this->authorize('canViewCompanyPlants', $isPolicy);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+            }
+
+            $company = Company::findOrFail($id);
+            $plants = $company->plants;
+
+            return response()->json($plants);
+        }
+
+        /**
+         * Update the specified resource in storage.
+         */
+        public function update(UpdateCompanyRequest $request)
+        {
+            $isPolicy = Auth::guard('sanctum')->user();
+
+            try {
+                $this->authorize('canUpdateCompany', $isPolicy);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+            }
+
+            $company = Company::findOrFail($request->id);
+
+            if ($company->image !== "images/default-image-for-company.png") {
+                Storage::disk('public')->delete($company->image);
+            }
+
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $data['image'] = $image->store('images', 'public');
@@ -73,143 +171,58 @@ class CompanyController extends Controller
                 $data['image'] = 'images/default-image-for-company.png';
             }
 
-            $company = Company::create([
+            $company->update([
                 'name' => $request->name,
                 'description' => $request->description,
                 'image' => $data['image'],
                 'location' => $request->location,
             ]);
 
-            $user->update(['company_id' => $company->id]);
-            $user->update(['role_id' => 2]);
-
-            $emailData = [
-                'recipient' => $user,
-                'isStore' => $request->isStore,
-                'company' => $company
-            ];
-
-            $application = Application::findOrFail($request->application_id);
-
-            $application->delete();
-        } else {
-            $application = Application::findOrFail($request->application_id);
-
-            $application->delete();
-
-            $emailData = [
-                'recipient' => $user,
-                'isStore' => $request->isStore,
-                'company' => ['name' => $request->name]
-            ];
+            return response()->json($company);
         }
 
-        CreateCompanyJob::dispatch($emailData);
+        /**
+         * Remove the specified resource from storage.
+         */
+        public function destroy(string $id)
+        {
+            $isPolice = Auth::guard('sanctum')->user();
 
-        return response()->json($company ?? 'Не одобрено');
+            try {
+                $this->authorize('canDeleteCompany', $isPolice);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
+            }
+
+            $company = Company::findOrFail($id);
+
+            // Установите company_id всех пользователей, связанных с данной компанией, в null
+            $company->users()->update(['company_id' => null]);
+
+            if ($company->image !== "images/default-image-for-company.png") {
+                Storage::disk('public')->delete($company->image);
+            }
+
+            if ($company->plants()->exists()) {
+                foreach ($company->plants as $plant) {
+                    $sensor = $plant->sensor;
+                    foreach ($sensor->sensorDates as $date) {
+                        $date->delete();
+                    }
+                    $sensor->delete();
+                    $plant->delete();
+                }
+            }
+
+            $company->delete();
+
+            $user = User::findOrFail($isPolice->id);
+            $user->role_id = 3;
+            $user->save();
+
+            $user->role = $user->role;
+
+            return response()->json($user);
+        }
 
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        $isPolicy = Auth::guard('sanctum')->user();
-
-        try {
-            $this->authorize('canViewCompany', $isPolicy);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
-        }
-
-        $companies = Company::findOrFail($id);
-
-        return response()->json($companies);
-    }
-
-    public function showPlants($id) {
-        $isPolicy = Auth::guard('sanctum')->user();
-
-        try {
-            $this->authorize('canViewCompanyPlants', $isPolicy);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
-        }
-
-        $company = Company::findOrFail($id);
-        $plants = $company->plants;
-
-        return response()->json($plants);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateCompanyRequest $request)
-    {
-        $isPolicy = Auth::guard('sanctum')->user();
-
-        try {
-            $this->authorize('canUpdateCompany', $isPolicy);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для менеджера або адміністратора']);
-        }
-
-        $company = Company::findOrFail($request->id);
-
-        if ($company->image !== "images/default-image-for-company.png") {
-            Storage::disk('public')->delete($company->image);
-        }
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $data['image'] = $image->store('images', 'public');
-        } else {
-            $data['image'] = 'images/default-image-for-company.png';
-        }
-
-        $company->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'image' => $data['image'],
-            'location' => $request->location,
-        ]);
-
-        return response()->json($company);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $isAdmin = Auth::guard('sanctum')->user();
-
-        try {
-            $this->authorize('canDeleteCompany', $isAdmin);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Ця дія можлива лише для адміністрації']);
-        }
-
-        $company = Company::findOrFail($id);
-
-        // Установите company_id всех пользователей, связанных с данной компанией, в null
-        $company->users()->update(['company_id' => null]);
-
-        if ($company->image !== "images/default-image-for-company.png") {
-            Storage::disk('public')->delete($company->image);
-        }
-
-        if ($company->plants()->exists()) {
-            $company->plants()->delete();
-        }
-
-        $company->delete();
-
-        return response()->json([
-            'message' => 'Видалення компанії пройшло успішно'
-        ]);
-    }
-
-}
