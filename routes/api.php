@@ -35,6 +35,7 @@
         Route::delete('/companies/destroy/{id}', [CompanyController::class, 'destroy']);
 
         Route::get('/plants', [PlantController::class, 'index']);
+        Route::get('/plants/{id}/show', [PlantController::class, 'show']);
         Route::get('/plants/{id}/edit', [PlantController::class, 'edit']);
         Route::post('/plants/update', [PlantController::class, 'update']);
         Route::post('/plants/store', [PlantController::class, 'store']);

@@ -7,6 +7,7 @@ use App\Http\Requests\StorePlantRequest;
 use App\Models\Company;
 use App\Models\Plant;
 use App\Models\Sensor;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,37 @@ class PlantController extends Controller
         $plants = Plant::all();
 
         return response()->json($plants);
+    }
+
+    public function show($id) {
+        $isPolicy = Auth::guard('sanctum')->user();
+
+        try {
+            $this->authorize('canShowPlant', $isPolicy);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
+        }
+
+        $plant = Plant::findOrFail($id);
+        $sensor = $plant->sensor;
+
+        $currentDateTime = now();
+
+        $oneHourAgo = $currentDateTime->subHour();
+
+        $latestSensorDates = $sensor->sensorDates()
+            ->where('created_at', '>=', $oneHourAgo)
+            ->get();
+
+        foreach ($latestSensorDates as $latestSensorDate) {
+            $latestSensorDate->formatted_created_at = Carbon::parse($latestSensorDate->created_at)->addHours(3)->format('d F Y H:i');
+        }
+
+        $sensor->sensor_dates = $latestSensorDates;
+
+        $plant->sensor = $sensor;
+
+        return response()->json($plant);
     }
 
     public function edit($id, Request $request) {

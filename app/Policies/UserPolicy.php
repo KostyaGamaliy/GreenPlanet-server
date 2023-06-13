@@ -35,6 +35,10 @@ class UserPolicy
         return $user->role->name === 'Admin';
     }
 
+    public function canShowPlant(User $user) {
+        return $user->role->name === 'Admin' || $user->role->name === 'Maneger' || $user->role->name === 'Employee';
+    }
+
     public function canGetUsersInCompany(User $user) {
         return $user->role->name === 'Admin';
     }
