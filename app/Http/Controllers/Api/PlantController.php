@@ -85,10 +85,10 @@ class PlantController extends Controller
             return response()->json(['message' => 'Ця дія можлива лише для працівників компанії або адміністратора']);
         }
 
-        $image = $request->file('image');
-
-        if ($image) {
-            $data['image'] = $image->store('images', 'public');
+        if ($request->input('image')) {
+            $data['image'] = $request->input('image');
+        } else if ($request->file('image')) {
+            $data['image'] = $request->file('image')->store('images', 'public');
         } else {
             $data['image'] = 'images/default-image-for-plant.png';
         }

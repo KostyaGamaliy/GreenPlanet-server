@@ -67,9 +67,10 @@
             }
 
             if ($request->isStore) {
-                if ($request->hasFile('image')) {
-                    $image = $request->file('image');
-                    $data['image'] = $image->store('images', 'public');
+                if ($request->input('image')) {
+                    $data['image'] = $request->input('image');
+                } else if ($request->file('image')) {
+                    $data['image'] = $request->file('image')->store('images', 'public');
                 } else {
                     $data['image'] = 'images/default-image-for-company.png';
                 }
@@ -214,13 +215,14 @@
                 }
             }
 
+            $users = $company->users;
+
+            foreach ($users as $user) {
+                $user->role_id !== 1 ? $user->role_id = 3 : $user->role_id = 1;
+                $user->save();
+            }
+
             $company->delete();
-
-            $user = User::findOrFail($isPolice->id);
-            $user->role_id = 3;
-            $user->save();
-
-            $user->role = $user->role;
 
             return response()->json($user);
         }
